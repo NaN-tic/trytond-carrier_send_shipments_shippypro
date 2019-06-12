@@ -7,8 +7,7 @@ from trytond.model import fields
 __all__ = ['Carrier']
 
 
-class Carrier:
-    __metaclass__ = PoolMeta
+class Carrier(metaclass=PoolMeta):
     __name__ = 'carrier'
     shippypro_carrier_id = fields.Integer('Shippypro CarrierId')
     shippypro_carrier_name = fields.Char('Shippypro CarrierName')

@@ -8,8 +8,7 @@ from trytond.pyson import Eval
 __all__ = ['CarrierApi']
 
 
-class CarrierApi:
-    __metaclass__ = PoolMeta
+class CarrierApi(metaclass=PoolMeta):
     __name__ = 'carrier.api'
     shippypro_content_description = fields.Char('Content Description',
         states={

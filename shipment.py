@@ -26,8 +26,7 @@ def shippypro_send(api, values):
         data=values, headers=headers, timeout=api.timeout)
 
 
-class ShipmentOut:
-    __metaclass__ = PoolMeta
+class ShipmentOut(metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
 
     @classmethod
