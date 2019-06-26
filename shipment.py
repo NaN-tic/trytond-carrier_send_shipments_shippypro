@@ -149,7 +149,7 @@ class ShipmentOut:
             params["ContentDescription"] = api.shippypro_content_description
             params["Insurance"] = 0 # set hardcode value; required
             params["InsuranceCurrency"] = currency
-            params["CashOnDelivery"] = price_ondelivery
+            params["CashOnDelivery"] = "%s" % (price_ondelivery)
             params["CashOnDeliveryCurrency"] = currency
             params["CashOnDeliveryType"] = 0 # 0 = Cash, 1 = Cashier's check, 2 = Check
             params["CarrierName"] = carrier_name
