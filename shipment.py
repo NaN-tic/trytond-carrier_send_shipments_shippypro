@@ -38,6 +38,16 @@ class ShipmentOut(metaclass=PoolMeta):
             })
 
     @classmethod
+    def shippypro_get_parcels(cls, api, shipment, weight):
+        # Default parcels
+        parcels = {}
+        parcels["length"] = 1
+        parcels["width"] = 1
+        parcels["height"] = 1
+        parcels["weight"] = weight
+        return [parcels]
+
+    @classmethod
     def send_shippypro(cls, api, shipments):
         '''
         Send shipments out to shippypro
@@ -141,14 +151,14 @@ class ShipmentOut(metaclass=PoolMeta):
             parcels["width"] = 1 # set hardcode value; required
             parcels["height"] = 1 # set hardcode value; required
             parcels["weight"] = weight
-            params["parcels"] = [parcels]
+            params["parcels"] = cls.shippypro_get_parcels(api, shipment, weight)
 
             params["TotalValue"] = "%s %s" % (shipment.total_amount, currency)
             params["TransactionID"] = "%s" % code
             params["ContentDescription"] = api.shippypro_content_description
             params["Insurance"] = 0 # set hardcode value; required
             params["InsuranceCurrency"] = currency
-            params["CashOnDelivery"] = "%s" % (price_ondelivery)
+            params["CashOnDelivery"] = float(price_ondelivery) if price_ondelivery else 0
             params["CashOnDeliveryCurrency"] = currency
             params["CashOnDeliveryType"] = 0 # 0 = Cash, 1 = Cashier's check, 2 = Check
             params["CarrierName"] = carrier_name
