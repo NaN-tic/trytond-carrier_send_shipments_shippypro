@@ -170,6 +170,7 @@ class ShipmentOut:
             params["Incoterm"] = "DAP" # set hardcode value; required
             params["BillAccountNumber"] = ""
             params["Note"] = unaccent(notes)
+            params["Async"] = False
 
             values["Params"] = params
 
@@ -183,6 +184,11 @@ class ShipmentOut:
             shippypro_errors = results.get('Error')
             if shippypro_errors:
                 errors.append(shippypro_errors)
+                continue
+
+            shippypro_errors = results.get('ErrorMessage')
+            if shippypro_errors and results.get('Status') != '1':
+                logger.error(shippypro_errors)
                 continue
 
             validation_errors = results.get('ValidationErrors')
@@ -247,7 +253,7 @@ class ShipmentOut:
                 continue
 
             shippypro_errors = results.get('ErrorMessage')
-            if shippypro_errors:
+            if shippypro_errors and results.get('Status') != '1':
                 logger.error(shippypro_errors)
                 continue
 
