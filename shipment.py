@@ -134,8 +134,11 @@ class ShipmentOut:
             params["from_address"] = {}
             params["from_address"]["name"] = unaccent(api.company.party.name)
             params["from_address"]["company"] = unaccent(api.company.party.name)
-            params["from_address"]["street1"] = unaccent(waddress.street)
-            params["from_address"]["street2"] = ""
+
+            street1, street2 = cls.shippypro_split_street(unaccent(waddress.street))
+            params["from_address"]["street1"] = street1
+            params["from_address"]["street2"] = street2
+
             params["from_address"]["city"] = unaccent(waddress.city)
             params["from_address"]["state"] = (waddress.subdivision.code
                 if waddress.subdivision else "")
@@ -219,6 +222,10 @@ class ShipmentOut:
             cls.write(*to_write)
 
         return references, labels, errors
+
+    @classmethod
+    def shippypro_split_street(cls, street):
+        return street, ""
 
     @classmethod
     def print_labels_shippypro(cls, api, shipments):
