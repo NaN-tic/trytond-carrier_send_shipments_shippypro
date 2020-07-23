@@ -71,18 +71,11 @@ class ShipmentOut:
         if shipment.carrier_cashondelivery:
             price_ondelivery = shipment.carrier_cashondelivery_price
 
-        carrier_id = shipment.carrier.shippypro_carrier_id or api.shippypro_carrier_id
-        carrier_name = shipment.carrier.shippypro_carrier_name or api.shippypro_carrier_name
-        if not carrier_id or not carrier_name or not service:
-            err = cls.raise_user_error('shippypro_carrier_and_service', {},
-                                           raise_exception=False)
-            return err, None
-
         params = {}
         params["to_address"] = {}
         params["to_address"]["name"] = unaccent(shipment.customer.name)[:35]  # Name cannot exceed 35 characters
         params["to_address"]["company"] = ""
-        params["to_address"]["street1"] = unaccent(shipment.delivery_address.street)
+        params["to_address"]["street1"] = unaccent(shipment.delivery_address.street)[:35]
         params["to_address"]["street2"] = ""
         params["to_address"]["city"] = unaccent(shipment.delivery_address.city)
         params["to_address"]["state"] = (shipment.delivery_address.subdivision.code
@@ -94,7 +87,7 @@ class ShipmentOut:
                                            or "")
         params["to_address"]["phone"] = unspaces(shipment.mobile or shipment.phone
                                         or api.phone)
-        params["to_address"]["email"] = unspaces(shipment.email)
+        params["to_address"]["email"] = unspaces(shipment.email)[:64]
 
         params["from_address"] = {}
         params["from_address"]["name"] = unaccent(api.company.party.name)
@@ -115,25 +108,27 @@ class ShipmentOut:
         params["parcels"] = cls.shippypro_get_parcels(api, shipment, weight)
 
         params["TotalValue"] = "%s %s" % (shipment.total_amount, currency)
-        params["TransactionID"] = "%s" % code
-        params["ContentDescription"] = api.shippypro_content_description
+        params["TransactionID"] = ("%s" % code)[35]
+        params["ContentDescription"] = api.shippypro_content_description[:255]
         params["Insurance"] = 0  # set hardcode value; required
         params["InsuranceCurrency"] = currency
         params["CashOnDelivery"] = (float(price_ondelivery) if price_ondelivery
                                     else 0)
         params["CashOnDeliveryCurrency"] = currency
         params["CashOnDeliveryType"] = 0  # 0 = Cash, 1 = Cashier's check, 2 = Check
-        params["CarrierName"] = carrier_name
+        params["CarrierName"] = (shipment.carrier.shippypro_carrier_name
+                or api.shippypro_carrier_name)
         params["CarrierService"] = service.code
-        params["CarrierID"] = carrier_id
+        params["CarrierID"] = (shipment.carrier.shippypro_carrier_id
+                or api.shippypro_carrier_id)
         params["OrderID"] = shipment.id
         params["RateID"] = ""
         params["Incoterm"] = "DAP"  # set hardcode value; required
         params["BillAccountNumber"] = ""
-        params["Note"] = unaccent(notes)
+        params["Note"] = unaccent(notes)[:255]
         params["Async"] = False
 
-        return None, params
+        return params
 
     @classmethod
     def send_shippypro(cls, api, shipments):
@@ -175,17 +170,23 @@ class ShipmentOut:
                         weight = Uom.compute_qty(
                             api.weight_unit, weight, api.weight_api_unit)
 
+            carrier_id = (shipment.carrier.shippypro_carrier_id
+                    or api.shippypro_carrier_id)
+            carrier_name = (shipment.carrier.shippypro_carrier_name
+                    or api.shippypro_carrier_name)
+            if not carrier_id or not carrier_name or not service:
+                cls.raise_user_error('shippypro_carrier_and_service', {},
+                        raise_exception=False)
+                continue
+
             parcels = {}
             parcels["length"] = 1 # set hardcode value; required
             parcels["width"] = 1 # set hardcode value; required
             parcels["height"] = 1 # set hardcode value; required
             parcels["weight"] = weight
 
-            error, values["Params"] = cls._shippypro_get_params(api, shipment,
+            values["Params"] = cls._shippypro_get_params(api, shipment,
                     service, weight)
-            if error:
-                errors.append(error)
-                continue
 
             response = shippypro_send(api, json.dumps(values))
             results = json.loads(response.text)
