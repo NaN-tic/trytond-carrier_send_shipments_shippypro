@@ -108,7 +108,7 @@ class ShipmentOut:
         params["parcels"] = cls.shippypro_get_parcels(api, shipment, weight)
 
         params["TotalValue"] = "%s %s" % (shipment.total_amount, currency)
-        params["TransactionID"] = ("%s" % code)[35]
+        params["TransactionID"] = ("%s" % code)[:35]
         params["ContentDescription"] = api.shippypro_content_description[:255]
         params["Insurance"] = 0  # set hardcode value; required
         params["InsuranceCurrency"] = currency
