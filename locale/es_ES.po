@@ -2,6 +2,6 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
-msgctxt "field:stock.shipment.out,shippypro_order_ref:"
+msgctxt "field:stock.shipment.out,shippypro_neworder_id:"
 msgid "Shippypro order ref."
 msgstr "Referencia Shippypro"

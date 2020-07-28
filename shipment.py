@@ -31,7 +31,7 @@ class ShipmentOut:
     __metaclass__ = PoolMeta
     __name__ = 'stock.shipment.out'
 
-    shippypro_order_ref = fields.Char('Shippypro order ref.')
+    shippypro_neworder_id = fields.Char('Shippypro order ref.')
 
     @classmethod
     def __setup__(cls):
@@ -199,7 +199,7 @@ class ShipmentOut:
                 errors.append(validation_errors)
 
             carrier_tranking_ref = cls.get_carrier_tracking_reference(results)
-            shippypro_order_ref = cls.get_shippypro_order_reference(results)
+            shippypro_neworder_id = cls.get_shippypro_new_order_id(results)
             if carrier_tranking_ref:
                 values = {
                     'carrier_tracking_ref': carrier_tranking_ref,
@@ -209,7 +209,7 @@ class ShipmentOut:
                     'carrier_send_employee': ShipmentOut.get_carrier_employee() or None,
                     }
                 shipment.carrier_tracking_ref = carrier_tranking_ref
-                shipment.shippypro_order_ref = shippypro_order_ref
+                shipment.shippypro_order_ref = shippypro_neworder_id
                 to_write.extend(([shipment], values))
                 logger.info('Send shipment %s' % (shipment.code))
                 references.append(shipment.code)
@@ -230,7 +230,7 @@ class ShipmentOut:
         return results.get('NewOrderID')
 
     @classmethod
-    def get_shippypro_order_reference(cls, results):
+    def get_shippypro_new_order_id(cls, results):
         return results.get('NewOrderID')
 
     @classmethod
