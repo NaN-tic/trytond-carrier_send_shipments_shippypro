@@ -3,6 +3,7 @@
 # the full copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
+from trytond.model import fields
 from trytond.modules.carrier_send_shipments.tools import unaccent, unspaces
 import requests
 import logging
@@ -28,6 +29,8 @@ def shippypro_send(api, values):
 
 class ShipmentOut(metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
+
+    shippypro_neworder_id = fields.Char('Shippypro order ref.')
 
     @classmethod
     def __setup__(cls):
@@ -208,16 +211,18 @@ class ShipmentOut(metaclass=PoolMeta):
             if validation_errors:
                 errors.append(validation_errors)
 
-            reference = results.get('NewOrderID')
-            if reference:
+            carrier_tranking_ref = cls.get_carrier_tracking_reference(results)
+            shippypro_neworder_id = cls.get_shippypro_new_order_id(results)
+            if carrier_tranking_ref:
                 values = {
-                    'carrier_tracking_ref': reference,
+                    'carrier_tracking_ref': carrier_tranking_ref,
                     'carrier_service': service,
                     'carrier_delivery': True,
                     'carrier_send_date': ShipmentOut.get_carrier_date(),
                     'carrier_send_employee': ShipmentOut.get_carrier_employee() or None,
                     }
-                shipment.carrier_tracking_ref = reference
+                shipment.carrier_tracking_ref = carrier_tranking_ref
+                shipment.shippypro_order_ref = shippypro_neworder_id
                 to_write.extend(([shipment], values))
                 logger.info('Send shipment %s' % (shipment.code))
                 references.append(shipment.code)
@@ -232,6 +237,14 @@ class ShipmentOut(metaclass=PoolMeta):
             cls.write(*to_write)
 
         return references, labels, errors
+
+    @classmethod
+    def get_carrier_tracking_reference(cls, results):
+        return results.get('NewOrderID')
+
+    @classmethod
+    def get_shippypro_new_order_id(cls, results):
+        return results.get('NewOrderID')
 
     @classmethod
     def print_labels_shippypro(cls, api, shipments):
