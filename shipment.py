@@ -29,8 +29,7 @@ def shippypro_send(api, values):
 
 class ShipmentOut(metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
-
-    shippypro_neworder_id = fields.Char('Shippypro order ref.')
+    shippypro_neworder_id = fields.Char('Shippypro Order Ref.')
 
     @classmethod
     def __setup__(cls):
@@ -216,13 +215,12 @@ class ShipmentOut(metaclass=PoolMeta):
             if carrier_tranking_ref:
                 values = {
                     'carrier_tracking_ref': carrier_tranking_ref,
+                    'shippypro_neworder_id': shippypro_neworder_id,
                     'carrier_service': service,
                     'carrier_delivery': True,
                     'carrier_send_date': ShipmentOut.get_carrier_date(),
                     'carrier_send_employee': ShipmentOut.get_carrier_employee() or None,
                     }
-                shipment.carrier_tracking_ref = carrier_tranking_ref
-                shipment.shippypro_order_ref = shippypro_neworder_id
                 to_write.extend(([shipment], values))
                 logger.info('Send shipment %s' % (shipment.code))
                 references.append(shipment.code)
