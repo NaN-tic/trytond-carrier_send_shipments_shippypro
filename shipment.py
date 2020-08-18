@@ -123,7 +123,7 @@ class ShipmentOut:
         params["CarrierService"] = service.code
         params["CarrierID"] = (shipment.carrier.shippypro_carrier_id
                 or api.shippypro_carrier_id)
-        params["OrderID"] = shipment.id
+        params["OrderID"] = str(shipment.id)
         params["RateID"] = ""
         params["Incoterm"] = "DAP"  # set hardcode value; required
         params["BillAccountNumber"] = ""
@@ -255,19 +255,19 @@ class ShipmentOut:
 
         to_write = []
         for shipment in shipments:
-            if not shipment.carrier_tracking_ref:
+            order_id = shipment.shippypro_neworder_id
+            if not order_id:
                 logger.error(
                     'Shipment %s has not been sent by Shippypro.'
                     % (shipment.code))
                 continue
 
-            reference = shipment.carrier_tracking_ref
             document = api.shippypro_document or 'PDF'
 
             values = {}
             values["Method"] = "GetOrder"
             params = {}
-            params['OrderID'] = shipment.carrier_tracking_ref
+            params['OrderID'] = order_id
             values["Params"] = params
 
             response = shippypro_send(api, json.dumps(values))
@@ -292,7 +292,7 @@ class ShipmentOut:
                     continue
 
                 with tempfile.NamedTemporaryFile(
-                        prefix='%s-shippypro-%s-' % (dbname, reference),
+                        prefix='%s-shippypro-%s-' % (dbname, order_id),
                         suffix='.%s' % document, delete=False) as temp:
                     temp.write(response2.content)
                 logger.info(
