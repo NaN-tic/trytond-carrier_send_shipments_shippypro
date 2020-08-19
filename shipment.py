@@ -221,6 +221,8 @@ class ShipmentOut(metaclass=PoolMeta):
                     'carrier_send_date': ShipmentOut.get_carrier_date(),
                     'carrier_send_employee': ShipmentOut.get_carrier_employee() or None,
                     }
+                shipment.carrier_tracking_ref = carrier_tranking_ref
+                shipment.shippypro_neworder_id = shippypro_neworder_id
                 to_write.extend(([shipment], values))
                 logger.info('Send shipment %s' % (shipment.code))
                 references.append(shipment.code)
