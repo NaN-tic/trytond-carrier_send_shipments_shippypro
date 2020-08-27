@@ -241,7 +241,7 @@ class ShipmentOut:
 
     @classmethod
     def get_carrier_tracking_reference(cls, results):
-        return results.get('NewOrderID')
+        return results.get('TrackingNumber')
 
     @classmethod
     def get_shippypro_new_order_id(cls, results):
