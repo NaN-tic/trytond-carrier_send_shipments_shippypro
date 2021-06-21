@@ -4,12 +4,17 @@
 from trytond.pool import PoolMeta
 from trytond.model import fields
 from trytond.pyson import Eval
+from trytond.i18n import gettext
+from trytond.exceptions import UserError
+from trytond.modules.carrier_send_shipments_shippypro.tools import shippypro_send
+import json
 
 __all__ = ['CarrierApi']
 
 
 class CarrierApi(metaclass=PoolMeta):
     __name__ = 'carrier.api'
+    shippypro_api_key = fields.Boolean('Shippypro API Key')
     shippypro_content_description = fields.Char('Content Description',
         states={
             'required': Eval('method') == 'shippypro',
@@ -25,13 +30,18 @@ class CarrierApi(metaclass=PoolMeta):
             'required': Eval('method') == 'shippypro',
         }, depends=['method'])
 
+    @classmethod
+    def __setup__(cls):
+        super(CarrierApi, cls).__setup__()
+        cls.password.states['required'] = False
+
     @staticmethod
     def default_shippypro_document():
         return 'PDF'
 
     @classmethod
     def get_carrier_app(cls):
-        'Add Carrier MRW APP'
+        'Add Carrier Shippypro APP'
         res = super(CarrierApi, cls).get_carrier_app()
         res.append(('shippypro', 'Shippypro'))
         return res
@@ -39,5 +49,11 @@ class CarrierApi(metaclass=PoolMeta):
     @classmethod
     def test_shippypro(cls, api):
         'Test shippypro connection'
-        message = 'Connection unknown result'
-        cls.raise_user_error(message)
+        values = {
+            "Method": "GetCarriers",
+            "Params": {}
+            }
+        response = shippypro_send(api, values)
+        raise UserError(
+            gettext('carrier_send_shipments_shippypro.msg_test_connection',
+            message=response.text))

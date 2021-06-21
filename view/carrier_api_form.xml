@@ -5,6 +5,8 @@ copyright notices and license terms. -->
 <data>
     <xpath expr="/form/notebook/page[@id='api']" position="after">
         <page string="Shippypro" id="shippypro">
+            <label name="shippypro_api_key"/>
+            <field name="shippypro_api_key"/>
             <label name="shippypro_content_description"/>
             <field name="shippypro_content_description"/>
             <label name="shippypro_carrier_id"/>

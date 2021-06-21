@@ -4,7 +4,11 @@
 from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
 from trytond.model import fields
+from trytond.i18n import gettext
+from trytond.exceptions import UserError
 from trytond.modules.carrier_send_shipments.tools import unaccent, unspaces
+from trytond.modules.carrier_send_shipments_shippypro.tools import shippypro_send
+from requests.auth import HTTPBasicAuth
 import requests
 import logging
 import time
@@ -15,29 +19,10 @@ import json
 __all__ = ['ShipmentOut']
 logger = logging.getLogger(__name__)
 
-def shippypro_header(api):
-    return base64.b64encode('%s:%s' % (api.username, api.password))
-
-def shippypro_send(api, values):
-    headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Basic %s' % shippypro_header(api)
-    }
-    return requests.post('https://www.shippypro.com/api',
-        data=values, headers=headers, timeout=api.timeout)
-
 
 class ShipmentOut(metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
     shippypro_neworder_id = fields.Char('Shippypro Order Ref.')
-
-    @classmethod
-    def __setup__(cls):
-        super(ShipmentOut, cls).__setup__()
-        cls._error_messages.update({
-            'shippypro_carrier_and_service': ('Please, configure a CarrierID, '
-                'CarrierName or Service in Shippypro or carrier configuration.'),
-            })
 
     @classmethod
     def shippypro_get_parcels(cls, api, shipment, weight):
@@ -56,7 +41,7 @@ class ShipmentOut(metaclass=PoolMeta):
         else:
             waddress = api.company.party.addresses[0]
 
-        code = shipment.code
+        code = shipment.number
         currency = shipment.currency.code
         if api.reference_origin and hasattr(shipment, 'origin'):
             if shipment.origin:
@@ -176,9 +161,8 @@ class ShipmentOut(metaclass=PoolMeta):
             carrier_name = (shipment.carrier.shippypro_carrier_name
                     or api.shippypro_carrier_name)
             if not carrier_id or not carrier_name or not service:
-                cls.raise_user_error('shippypro_carrier_and_service', {},
-                        raise_exception=False)
-                continue
+                raise UserError(
+                    gettext('carrier_send_shipments_shippypro.msg_shippypro_carrier_and_service'))
 
             parcels = {}
             parcels["length"] = 1 # set hardcode value; required
@@ -189,8 +173,9 @@ class ShipmentOut(metaclass=PoolMeta):
             values["Params"] = cls._shippypro_get_params(api, shipment,
                     service, weight)
 
-            response = shippypro_send(api, json.dumps(values))
+            response = shippypro_send(api, values)
             results = json.loads(response.text)
+
             if not response.status_code == 200:
                 message = '%s %s' % (response.status_code, results.get('Error'))
                 errors.append(message)
@@ -198,12 +183,16 @@ class ShipmentOut(metaclass=PoolMeta):
 
             shippypro_errors = results.get('Error')
             if shippypro_errors:
-                errors.append(shippypro_errors)
+                errors.append('%s %s' % (
+                    shippypro_errors,
+                    results.get('ValidationErrors', '')))
                 continue
 
             shippypro_errors = results.get('ErrorMessage')
             if shippypro_errors and results.get('Status') != '1':
-                logger.error(shippypro_errors)
+                errors.append('%s %s' % (
+                    shippypro_errors,
+                    results.get('ValidationErrors', '')))
                 continue
 
             validation_errors = results.get('ValidationErrors')
@@ -224,14 +213,14 @@ class ShipmentOut(metaclass=PoolMeta):
                 shipment.carrier_tracking_ref = carrier_tranking_ref
                 shipment.shippypro_neworder_id = shippypro_neworder_id
                 to_write.extend(([shipment], values))
-                logger.info('Send shipment %s' % (shipment.code))
-                references.append(shipment.code)
+                logger.info('Send shipment %s' % (shipment.number))
+                references.append(shipment.number)
                 # add time sleep because we need the signal shippypro
                 # and carrier return the label
                 time.sleep(10)
                 labels += cls.print_labels_shippypro(api, [shipment])
             else:
-                logger.error('Not send shipment %s.' % (shipment.code))
+                logger.error('Not send shipment %s.' % (shipment.number))
 
         if to_write:
             cls.write(*to_write)
@@ -260,7 +249,7 @@ class ShipmentOut(metaclass=PoolMeta):
             if not order_id:
                 logger.error(
                     'Shipment %s has not been sent by Shippypro.'
-                    % (shipment.code))
+                    % (shipment.number))
                 continue
 
             document = api.shippypro_document or 'PDF'
@@ -271,7 +260,7 @@ class ShipmentOut(metaclass=PoolMeta):
             params['OrderID'] = order_id
             values["Params"] = params
 
-            response = shippypro_send(api, json.dumps(values))
+            response = shippypro_send(api, values)
             results = json.loads(response.text)
             if not response.status_code == 200:
                 message = '%s %s' % (response.status_code, results.get('Error'))
