@@ -1,0 +1,67 @@
+#
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "field:carrier,shippypro_carrier_id:"
+msgid "Shippypro CarrierId"
+msgstr "Shippypro CarrierId"
+
+msgctxt "field:carrier,shippypro_carrier_name:"
+msgid "Shippypro CarrierName"
+msgstr "Shippypro CarrierName"
+
+msgctxt "field:carrier.api,shippypro_api_key:"
+msgid "Shippypro API Key"
+msgstr "API key Shippypro"
+
+msgctxt "field:carrier.api,shippypro_carrier_id:"
+msgid "Shippypro CarrierId"
+msgstr "Shippypro CarrierId"
+
+msgctxt "field:carrier.api,shippypro_carrier_name:"
+msgid "Shippypro CarrierName"
+msgstr "Shippypro CarrierName"
+
+msgctxt "field:carrier.api,shippypro_content_description:"
+msgid "Content Description"
+msgstr "Descripción contenido"
+
+msgctxt "field:carrier.api,shippypro_document:"
+msgid "Shippypro Document"
+msgstr "Shippypro Documento"
+
+msgctxt "field:stock.shipment.out,shippypro_neworder_id:"
+msgid "Shippypro Order Ref."
+msgstr "Referencia Shippypro"
+
+msgctxt "help:carrier.api,shippypro_content_description:"
+msgid "Shippypro Content Description"
+msgstr "Shippypro Descripción contenido"
+
+msgctxt "model:ir.message,text:msg_shippypro_carrier_and_service"
+msgid ""
+"Please, configure a CarrierID, CarrierName or Service in Shippypro or "
+"carrier configuration"
+msgstr ""
+"Configure CarrierID, CarrierName o servicio de Shippypro o a la "
+"configuración del transportista"
+
+msgctxt "model:ir.message,text:msg_test_connection"
+msgid ""
+"Connection Shippypro result:\n"
+"%(message)s"
+msgstr ""
+"Resultado conexión Shippypro:\n"
+"%(message)s"
+
+msgctxt "selection:carrier.api,shippypro_document:"
+msgid "PDF"
+msgstr "PDF"
+
+msgctxt "selection:carrier.api,shippypro_document:"
+msgid "ZPL"
+msgstr "ZPL"
+
+msgctxt "view:carrier.api:"
+msgid "Shippypro"
+msgstr "Shippypro"
