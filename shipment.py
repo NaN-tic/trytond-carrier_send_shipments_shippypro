@@ -42,7 +42,8 @@ class ShipmentOut(metaclass=PoolMeta):
             waddress = api.company.party.addresses[0]
 
         code = shipment.number
-        currency = shipment.currency.code
+        currency = (shipment.currency.code
+            if hasattr(shipment, 'currency') else api.company.currency.code)
         if api.reference_origin and hasattr(shipment, 'origin'):
             if shipment.origin:
                 code = shipment.origin.rec_name
@@ -53,9 +54,10 @@ class ShipmentOut(metaclass=PoolMeta):
         if shipment.carrier_notes:
             notes = '%s\n' % shipment.carrier_notes
 
-        price_ondelivery = 0
-        if shipment.carrier_cashondelivery:
-            price_ondelivery = shipment.carrier_cashondelivery_price
+        total_amount = (shipment.total_amount or 0.0
+            if hasattr(shipment, 'total_amount') and shipment.total_amount else 0)
+        price_ondelivery = (shipment.carrier_cashondelivery_price or 0.0
+            if hasattr(shipment, 'carrier_cashondelivery') and shipment.carrier_cashondelivery else 0.0)
 
         params = {}
         params["to_address"] = {}
@@ -93,13 +95,12 @@ class ShipmentOut(metaclass=PoolMeta):
 
         params["parcels"] = cls.shippypro_get_parcels(api, shipment, weight)
 
-        params["TotalValue"] = "%s %s" % (shipment.total_amount, currency)
+        params["TotalValue"] = "%s %s" % (total_amount, currency)
         params["TransactionID"] = ("%s" % code)[:35]
         params["ContentDescription"] = api.shippypro_content_description[:255]
         params["Insurance"] = 0  # set hardcode value; required
         params["InsuranceCurrency"] = currency
-        params["CashOnDelivery"] = (float(price_ondelivery) if price_ondelivery
-                                    else 0)
+        params["CashOnDelivery"] = price_ondelivery
         params["CashOnDeliveryCurrency"] = currency
         params["CashOnDeliveryType"] = 0  # 0 = Cash, 1 = Cashier's check, 2 = Check
         params["CarrierName"] = (shipment.carrier.shippypro_carrier_name
