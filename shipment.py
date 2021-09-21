@@ -8,12 +8,10 @@ from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from trytond.modules.carrier_send_shipments.tools import unaccent, unspaces
 from trytond.modules.carrier_send_shipments_shippypro.tools import shippypro_send
-from requests.auth import HTTPBasicAuth
 import requests
 import logging
 import time
 import tempfile
-import base64
 import json
 
 __all__ = ['ShipmentOut']
@@ -290,9 +288,12 @@ class ShipmentOut(metaclass=PoolMeta):
                     'Generated tmp label %s' % (temp.name))
                 temp.close()
                 labels.append(temp.name)
-                to_write.extend(([shipment], {'carrier_printed': True}))
 
+                to_write.extend(([shipment], {
+                    'carrier_printed': True,
+                    'carrier_tracking_label': fields.Binary.cast(
+                        open(temp.name, "rb").read()),
+                    }))
         if to_write:
             cls.write(*to_write)
-
         return labels
