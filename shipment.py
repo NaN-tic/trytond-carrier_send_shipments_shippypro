@@ -145,8 +145,8 @@ class ShipmentOut(metaclass=PoolMeta):
                     default_service)
 
             weight = 1.0
-            if api.weight and hasattr(shipment, 'weight_func'):
-                weight = shipment.weight_func
+            if api.weight and hasattr(shipment, 'manual_weight'):
+                weight = shipment.manual_weight or shipment.weight
                 weight = 1.0 if weight == 0.0 else weight
 
                 if api.weight_api_unit:
