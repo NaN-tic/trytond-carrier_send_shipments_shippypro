@@ -7,9 +7,6 @@ from trytond.pyson import Eval
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from trytond.modules.carrier_send_shipments_shippypro.tools import shippypro_send
-import json
-
-__all__ = ['CarrierApi']
 
 
 class CarrierApi(metaclass=PoolMeta):

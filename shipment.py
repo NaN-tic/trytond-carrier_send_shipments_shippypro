@@ -8,15 +8,12 @@ from trytond.i18n import gettext
 from trytond.exceptions import UserError
 from trytond.modules.carrier_send_shipments.tools import unaccent, unspaces
 from trytond.modules.carrier_send_shipments_shippypro.tools import shippypro_send
-from requests.auth import HTTPBasicAuth
 import requests
 import logging
 import time
 import tempfile
-import base64
 import json
 
-__all__ = ['ShipmentOut']
 logger = logging.getLogger(__name__)
 
 
