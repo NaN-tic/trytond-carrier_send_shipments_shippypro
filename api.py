@@ -15,7 +15,7 @@ class CarrierApi(metaclass=PoolMeta):
     shippypro_content_description = fields.Char('Content Description',
         states={
             'required': Eval('method') == 'shippypro',
-        }, depends=['method'],
+        },
         help='Shippypro Content Description')
     shippypro_carrier_id = fields.Integer('Shippypro CarrierId')
     shippypro_carrier_name = fields.Char('Shippypro CarrierName')
@@ -25,7 +25,7 @@ class CarrierApi(metaclass=PoolMeta):
         ], 'Shippypro Document',
         states={
             'required': Eval('method') == 'shippypro',
-        }, depends=['method'])
+        })
 
     @classmethod
     def __setup__(cls):
