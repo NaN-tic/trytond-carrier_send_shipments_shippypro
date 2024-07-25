@@ -48,8 +48,8 @@ class ShipmentOut(metaclass=PoolMeta):
                     currency = shipment.origin.currency.code
 
         notes = ''
-        if shipment.carrier_notes:
-            notes = '%s\n' % shipment.carrier_notes
+        if shipment.carrier_note:
+            notes = '%s\n' % shipment.carrier_note
 
         total_amount = (shipment.total_amount or 0.0
             if hasattr(shipment, 'total_amount') and shipment.total_amount else 0)
