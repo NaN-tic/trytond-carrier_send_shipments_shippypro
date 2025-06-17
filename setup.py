@@ -9,7 +9,13 @@ from configparser import ConfigParser
 
 MODULE = 'carrier_send_shipments_shippypro'
 PREFIX = 'nantic'
-MODULE2PREFIX = {}
+MODULE2PREFIX = {
+    'carrier_api',
+    'carrier_send_shipments',
+    'stock_delivery',
+    'stock_comment',
+    'stock_origin',
+}
 
 
 def read(fname):
@@ -64,12 +70,12 @@ if minor_version % 2:
 
 setup(name='%s_%s' % (PREFIX, MODULE),
     version=version,
-    description='',
+    description='%s' % MODULE,
     long_description=read('README'),
     author='NaN·tic',
     author_email='info@nan-tic.com',
     url='http://www.nan-tic.com/',
-    download_url="https://bitbucket.org/nantic/trytond-%s" % MODULE,
+    download_url="https://github.com/Nan-tic/trytond-%s" % MODULE,
     package_dir={'trytond.modules.%s' % MODULE: '.'},
     packages=[
         'trytond.modules.%s' % MODULE,
