@@ -10,11 +10,11 @@ from configparser import ConfigParser
 MODULE = 'carrier_send_shipments_shippypro'
 PREFIX = 'nantic'
 MODULE2PREFIX = {
-    'carrier_api',
-    'carrier_send_shipments',
-    'stock_delivery',
-    'stock_comment',
-    'stock_origin',
+    'carrier_api': 'nantic',
+    'carrier_send_shipments': 'nantic',
+    'stock_delivery': 'nantic',
+    'stock_comment': 'nantic',
+    'stock_origin': 'nantic',
 }
 
 
@@ -83,7 +83,7 @@ setup(name='%s_%s' % (PREFIX, MODULE),
         ],
     package_data={
         'trytond.modules.%s' % MODULE: (info.get('xml', [])
-            + ['tryton.cfg', 'locale/*.po', 'tests/*.rst']),
+            + ['tryton.cfg', 'view/*.xml', 'locale/*.po', 'tests/*.rst']),
         },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
